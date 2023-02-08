@@ -1,0 +1,13 @@
+{
+  "folders": [
+	{
+		"path": "../../.."
+	},
+	{
+		"path": "../../../../animacao"
+	}
+],
+  "settings": {
+    "liveServer.settings.multiRootWorkspaceName": "animacao"
+  }
+}
