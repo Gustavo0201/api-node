@@ -1,5 +1,148 @@
 <template>
   <v-container>
+    <!-------------------------------- cadstro de profissao -------------------------------->
+    <v-row>
+      <v-col class="pa-ml-12">
+        <v-hover v-slot="{ isHovering, props }">
+          <v-btn v-bind="props" :elevation="isHovering ? 24 : 6" :color="isHovering ? 'primary' : undefined">
+            CADASTRO DE PROFISSÃO
+            <v-dialog v-model="cadastroProfissao" activator="parent">
+              <v-col align-self="center" cols="6">
+                <v-card>
+                  <v-card-text>
+                    <v-form v-model="cadastroProfissaoValido" @submit.prevent="cadastrar">
+                      <v-row>
+                        <v-col>
+                          <v-text-field :rules="[v => Boolean(v) || 'Field is required']" label="PROFISSÃO"
+                            v-model="bodyProfissaoCadastrar.nome">
+                          </v-text-field>
+
+                          <v-btn type="submit" block :disabled="!cadastroProfissaoValido" color="primary">SALVAR
+                            PROFISSÃO</v-btn>
+                        </v-col>
+                      </v-row>
+                    </v-form>
+                  </v-card-text>
+                  <v-card-actions>
+                    <v-btn color="primary" block @click="cadastroProfissao = false">FECHAR</v-btn>
+                  </v-card-actions>
+                </v-card>
+              </v-col>
+            </v-dialog>
+          </v-btn>
+        </v-hover>
+
+        <v-tooltip v-model="profisson" location="bottom">
+          <template v-slot:activator="{ props }">
+            <v-icon class="pa-md-6" icon v-bind="props" color="grey-lighten-1" hover="primary">
+              mdi-help-circle-outline
+            </v-icon>
+          </template>
+          <span>Clique neste botão para adciona uma nova profissão.</span>
+        </v-tooltip>
+      </v-col>
+
+      <!-------------------------------- cadastro de usuario -------------------------------->
+      <v-col>
+        <v-hover v-slot="{ isHovering, props }">
+          <v-btn v-bind="props" :elevation="isHovering ? 24 : 6" :color="isHovering ? 'primary' : undefined">
+            CADASTRO DE USUÁRIO
+
+            <v-dialog v-model="cadastroUsuario" activator="parent">
+              <v-col align-self="center" cols="6">
+                <v-card>
+                  <v-card-text>
+                    <v-form v-model="cadastroUsuarioValido" @submit.prevent="cadastrarUsuario">
+                      <v-row class="text-center">
+                        <v-col>
+                          <v-text-field :rules="[v => Boolean(v) || 'Field is required']" label="USUÁRIO"
+                            v-model="bodyCadastrarUsuario.usuario"></v-text-field>
+                        </v-col>
+                      </v-row>
+                      <v-row>
+                        <v-col>
+                          <v-autocomplete :rules="[v => Boolean(v) || 'Field is required']" label="PROFISSÃO"
+                            :items="profissoes" item-title="nome" item-value="id"
+                            v-model="bodyCadastrarUsuario.profissaoId"></v-autocomplete>
+                          <v-btn type="submit" block :disabled="!cadastroUsuarioValido" color="primary">SALVAR
+                            USUÁRIO</v-btn>
+                        </v-col>
+                      </v-row>
+                    </v-form>
+                  </v-card-text>
+                  <v-card-actions>
+                    <v-btn color="primary" block @click="cadastroUsuario = false">FECHAR</v-btn>
+                  </v-card-actions>
+                </v-card>
+              </v-col>
+            </v-dialog>
+          </v-btn>
+        </v-hover>
+        <v-tooltip v-model="user" location="bottom">
+          <template v-slot:activator="{ props }">
+            <v-icon class="pa-md-6" icon v-bind="props" color="grey-lighten-1" hover="primary">
+              mdi-help-circle-outline
+            </v-icon>
+          </template>
+          <span>Clique neste botão para adciona um novo usuário.</span>
+        </v-tooltip>
+      </v-col>
+    </v-row>
+
+    <!-------------------------------- tabela profissao -------------------------------->
+    <v-row>
+      <v-col>
+        <v-table>
+          <thead>
+            <tr>
+              <th>PROFISSÃO <v-icon class="pa-md-3">mdi-briefcase-outline</v-icon></th>
+              <th>EDITAR <v-icon class="pa-md-3">mdi-pencil</v-icon></th>
+              <th>EXCLUIR <v-icon class="pa-md-3">mdi-delete-outline</v-icon></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(item, index) in profissoes" :key="index">
+              <td> {{ item.nome }} </td>
+              <td>
+                <v-btn @click="editarClick(item)" color="primary">
+                  EDITAR PROFISSÃO
+                  <v-icon>mdi-autorenew</v-icon>
+                </v-btn>
+              </td>
+              <td><v-btn @click="deletar(item.id)" class="deletar"><v-icon>mdi-delete-outline</v-icon></v-btn></td>
+            </tr>
+          </tbody>
+        </v-table>
+      </v-col>
+
+      <!-------------------------------- tababela usuario -------------------------------->
+      <v-col>
+        <v-table>
+          <thead>
+            <tr>
+              <th>USUÁRIO <v-icon class="pa-md-3">mdi-account-outline</v-icon></th>
+              <th>PROFISSÃO <v-icon class="pa-md-3">mdi-briefcase-outline</v-icon></th>
+              <th>EDITAR <v-icon class="pa-md-3">mdi-pencil</v-icon></th>
+              <th>EXCLUIR <v-icon class="pa-md-3">mdi-delete-outline</v-icon></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(item, index) in usuariosComputados" :key="index">
+              <td> {{ item.usuario }} </td>
+              <td> {{ item.profissao.nome }}</td>
+              <td>
+                <v-btn @click="editarClickUsuario(item)" color="primary">
+                  EDITAR USUÁRIO<v-icon>mdi-autorenew</v-icon>
+                </v-btn>
+              </td>
+              <td><v-btn @click="deletarUsuario(item.id)" class="deletar"><v-icon>mdi-delete-outline</v-icon></v-btn>
+              </td>
+            </tr>
+          </tbody>
+        </v-table>
+      </v-col>
+    </v-row>
+
     <!-------------------------------- editar profissao -------------------------------->
     <v-dialog v-model="atualizaProfissao">
       <v-col align-self="center" cols="6">
@@ -49,150 +192,6 @@
         </v-card>
       </v-col>
     </v-dialog>
-
-    <!-------------------------------- profissao -------------------------------->
-    <v-row>
-      <v-col class="pa-ml-12">
-        <v-hover v-slot="{ isHovering, props }">
-          <v-btn v-bind="props" :elevation="isHovering ? 24 : 6" :color="isHovering ? 'primary' : undefined">
-            CADASTRO DE PROFISSÃO
-            <v-dialog v-model="cadastroProfissao" activator="parent">
-              <v-col align-self="center" cols="6">
-                <v-card>
-                  <v-card-text>
-                    <v-form v-model="cadastroProfissaoValido" @submit.prevent="cadastrar">
-                      <v-row>
-                        <v-col>
-                          <v-text-field :rules="[v => Boolean(v) || 'Field is required']" label="PROFISSÃO"
-                            v-model="bodyProfissaoCadastrar.nome">
-                          </v-text-field>
-
-                          <v-btn type="submit" block :disabled="!cadastroProfissaoValido" color="primary">SALVAR
-                            PROFISSÃO</v-btn>
-                        </v-col>
-                      </v-row>
-                    </v-form>
-                  </v-card-text>
-                  <v-card-actions>
-                    <v-btn color="primary" block @click="cadastroProfissao = false">FECHAR</v-btn>
-                  </v-card-actions>
-                </v-card>
-              </v-col>
-            </v-dialog>
-          </v-btn>
-        </v-hover>
-
-        <v-tooltip v-model="profisson" location="bottom">
-          <template v-slot:activator="{ props }">
-            <v-icon class="pa-md-6" icon v-bind="props" color="grey-lighten-1" hover="primary">
-              mdi-help-circle-outline
-            </v-icon>
-          </template>
-          <span>Clique neste botão para adciona uma nova profissão.</span>
-        </v-tooltip>
-      </v-col>
-
-      <!-------------------------------- usuario -------------------------------->
-      <v-col>
-        <v-hover v-slot="{ isHovering, props }">
-          <v-btn v-bind="props" :elevation="isHovering ? 24 : 6" :color="isHovering ? 'primary' : undefined">
-            CADASTRO DE USUÁRIO
-
-            <v-dialog v-model="cadastroUsuario" activator="parent">
-              <v-col align-self="center" cols="6">
-                <v-card>
-                  <v-card-text>
-                    <v-form v-model="cadastroUsuarioValido" @submit.prevent="cadastrarUsuario">
-                      <v-row class="text-center">
-                        <v-col>
-                          <v-text-field :rules="[v => Boolean(v) || 'Field is required']" label="USUÁRIO"
-                            v-model="bodyCadastrarUsuario.usuario"></v-text-field>
-                        </v-col>
-                      </v-row>
-                      <v-row>
-                        <v-col>
-                          <v-autocomplete :rules="[v => Boolean(v) || 'Field is required']" label="PROFISSÃO"
-                            :items="profissoes" item-title="nome" item-value="id"
-                            v-model="bodyCadastrarUsuario.profissaoId"></v-autocomplete>
-                          <v-btn type="submit" block :disabled="!cadastroUsuarioValido" color="primary">SALVAR
-                            USUÁRIO</v-btn>
-                        </v-col>
-                      </v-row>
-                    </v-form>
-                  </v-card-text>
-                  <v-card-actions>
-                    <v-btn color="primary" block @click="cadastroUsuario = false">FECHAR</v-btn>
-                  </v-card-actions>
-                </v-card>
-              </v-col>
-            </v-dialog>
-          </v-btn>On branch main
-          nothing to commit, working tree clean
-        </v-hover>
-        <v-tooltip v-model="user" location="bottom">
-          <template v-slot:activator="{ props }">
-            <v-icon class="pa-md-6" icon v-bind="props" color="grey-lighten-1" hover="primary">
-              mdi-help-circle-outline
-            </v-icon>
-          </template>
-          <span>Clique neste botão para adciona um novo usuário.</span>
-        </v-tooltip>
-      </v-col>
-    </v-row>
-
-    <!-------------------------------- tab profissao -------------------------------->
-    <v-row>
-      <v-col>
-        <v-table>
-          <thead>
-            <tr>
-              <th>PROFISSÃO <v-icon class="pa-md-3">mdi-briefcase-outline</v-icon></th>
-              <th>EDITAR <v-icon class="pa-md-3">mdi-pencil</v-icon></th>
-              <th>EXCLUIR <v-icon class="pa-md-3">mdi-delete-outline</v-icon></th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="(item, index) in profissoes" :key="index">
-              <td> {{ item.nome }} </td>
-              <td>
-                <v-btn @click="editarClick(item)" color="primary">
-                  EDITAR PROFISSÃO
-                  <v-icon>mdi-autorenew</v-icon>
-                </v-btn>
-              </td>
-              <td><v-btn @click="deletar(item.id)" class="deletar"><v-icon>mdi-delete-outline</v-icon></v-btn></td>
-            </tr>
-          </tbody>
-        </v-table>
-      </v-col>
-
-      <!-------------------------------- tab usuario -------------------------------->
-      <v-col>
-        <v-table>
-          <thead>
-            <tr>
-              <th>USUÁRIO <v-icon class="pa-md-3">mdi-account-outline</v-icon></th>
-              <th>PROFISSÃO <v-icon class="pa-md-3">mdi-briefcase-outline</v-icon></th>
-              <th>EDITAR <v-icon class="pa-md-3">mdi-pencil</v-icon></th>
-              <th>EXCLUIR <v-icon class="pa-md-3">mdi-delete-outline</v-icon></th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="(item, index) in usuariosComputados" :key="index">
-              <td> {{ item.usuario }} </td>
-              <td> {{ item.profissao.nome }}</td>
-              <td>
-                <v-btn @click="editarClickUsuario(item)" color="primary">
-                  EDITAR USUÁRIO<v-icon>mdi-autorenew</v-icon>
-                </v-btn>
-              </td>
-              <td><v-btn @click="deletarUsuario(item.id)" class="deletar"><v-icon>mdi-delete-outline</v-icon></v-btn>
-              </td>
-            </tr>
-          </tbody>
-        </v-table>
-      </v-col>
-    </v-row>
   </v-container>
 </template>
 
@@ -206,8 +205,6 @@ export default {
   },
 
   data: () => ({
-
-    error: false,
 
     user: false,
     profisson: false,
@@ -224,7 +221,7 @@ export default {
     cadastroUsuarioValidoAtualizar: false,
     cadastroProfissaoValidoAtualizar: false,
 
-    // ------------------------------ app ------------------------------
+    // ------------------------------ profissao ------------------------------
     bodyProfissaoCadastrar: {
       nome: "",
     },
