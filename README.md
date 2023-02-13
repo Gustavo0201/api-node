@@ -10,7 +10,7 @@ docker-compose up
 npm install
 ```
 
-### use este comando na pasta /user para executar O front end
+### use este comando na pasta /user para executar o front end
 
 ```
 npm run serve
